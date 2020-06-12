@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 import sounddevice
 
+
+
+#operator class
 class Op():
 
     op_counter = 0
@@ -19,11 +22,15 @@ class Op():
 freq:{self.freq}   gain:{self.gain}   \
 feed:{self.feed}"
 
+
+
+#synth class
 class FM_Synth():
     
-    def __init__(self, f=440):
+    def __init__(self, f=440, length=1):
         self.sr = 44100.0
-        self.time = np.arange(0,1.0,1.0/self.sr)
+        self.length = length
+        self.time = np.arange(0,1.0,1.0/(self.sr*self.length))
         self.ops = []
         self.output = Op(freq=f)
         self.signal = None
@@ -37,7 +44,7 @@ class FM_Synth():
         self.ops.append(Op(freq, gain, feed))
 
     def build(self):       
-        mix = np.zeros(int(self.sr))
+        mix = np.zeros(int(self.length * self.sr))
         
         for i in self.ops:
             #print(f"{i.freq}")
@@ -50,7 +57,6 @@ class FM_Synth():
             product[i] = np.sin(2. * np.pi * (self.output.freq * t + mix[i]))
 
         y = self.norm(product)
-
         self.signal= y
 
     def clear(self):
@@ -69,27 +75,30 @@ class FM_Synth():
         
         s *= 32767
         s = np.int16(s)
-        wavfile.write("output.wav", self.sr, s) 
+        wavfile.write("output.wav", int(self.sr), s) 
                 
     def __repr__(self):
         return str([i for i in self.ops])
 
 
 
+#Drive Synth
 if __name__ == "__main__":
     from random import  randint as rnd
     import time
 
-    synth = FM_Synth(f=100)
+    note_length = 2
+
+    synth = FM_Synth(f=100, length=note_length)
 
     while True:
         for i in range(rnd(0,5)):
-            synth.create_op(freq = rnd(40,4000), gain=1.0/rnd(2,10), feed=1.0/rnd(1,3))     
+            synth.create_op(freq = rnd(40,4000), gain=1.0/rnd(2,9), feed=1.0/rnd(1,3))     
 
         synth.build()
         synth.play()
         synth.clear()
-        time.sleep(0.5)
+        time.sleep(note_length)
     
 
 ##    synth.plot()

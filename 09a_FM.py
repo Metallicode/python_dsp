@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
-from scipy import signal as sgl
-
 
 #normalize function
 def norm(data):
@@ -10,26 +8,43 @@ def norm(data):
     max_v = max(data)
     return np.array([((x-min_v) / (max_v-min_v)) for x in data])*2.0-1
 
-modulator_frequency = 50.0
-carrier_frequency = 100.0
-modulation_index = 5
-
-time = np.arange(44100.0) / 44100.0
-modulator = np.sin(2.0 * np.pi * modulator_frequency * time) * modulation_index
-
-product = np.zeros_like(modulator)
-
-for i, t in enumerate(time):
-    product[i] = np.sin(2. * np.pi * (carrier_frequency * t + modulator[i]))
 
 
-y = norm(product)
 
-plt.plot(time,y )
+
+###FM Part####
+modulator_frequency = 5.0                  #Hz
+carrier_frequency = 100.0                    #Hz
+
+length = 1
+#signal length in seconds
+sr = 44100.0                                             #sample rate
+t = np.arange(0,1.0,1.0/(length*sr))    #time axis
+
+depth = 2                                                  #modulation strength
+modulator = np.sin(2.0 * np.pi * modulator_frequency * t) * depth #modulator signal
+
+product = np.zeros_like(modulator)     #allocat memory 
+
+#generate modulated signal
+for i, j in enumerate(t):
+    product[i] = np.sin(2. * np.pi * (carrier_frequency * j + modulator[i]))
+
+y = norm(product) #normalize signal 
+
+
+
+
+
+
+#plot time & frequency and save to disk.....
+
+plt.plot(t,y )
+plt.plot(t, norm(modulator), color="red")
 plt.show()
 
 ####PLOT SIGNAL IN FREQUENCY DOMAIN####
-plt.plot(np.arange(20000),np.abs(np.fft.ifft(y))[:20000])
+plt.plot(np.arange(1000),np.abs(np.fft.ifft(y))[:1000])
 plt.show()
 
 ####WRITE AUDIO FILE####
