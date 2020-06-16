@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy.signal import savgol_filter
 
+
 #normalize function
 def norm(data):
     min_v = min(data)
@@ -15,21 +16,23 @@ t = np.arange(0,1.0,1.0/len(data))
 data = np.array(data,dtype=np.float64)
 data = norm(data)
 
-
 ###Chorus FX####
-carrier_frequency = 10# Hz
-depth = 100.0 # Hz
-signal = np.sin(2 * np.pi * carrier_frequency * t)*depth
+mod_frequency = 7.0 #Hz
+depth = 100.0
+
+lfo = np.sin(2*np.pi * t * mod_frequency)*depth
+
 
 product = np.zeros_like(data)
-phase = 0
 
-for n in range(0, len(data)):  
-        product[n] = data[n+ int(signal[n])]
-        
+
+for i in range(0, len(data)):
+    product[i] = data[i + int(lfo[i])]
+
 
 product = savgol_filter(product, 51, 3)
-product = norm(product+data)
+
+product = norm(data + product)
 
 
 
@@ -40,4 +43,4 @@ plt.show()
 ####WRITE AUDIO FILE####
 product *= 32767
 product = np.int16(product)
-wavfile.write("file.wav", 44100, product)
+wavfile.write("chorus_out.wav", 44100, product)
