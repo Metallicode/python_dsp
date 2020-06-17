@@ -3,13 +3,27 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy import signal as sig
 
-#normalize function
+#better normalize function
 def norm(data):
     min_v = min(data)
     max_v = max(data)
-    return np.array([((x-min_v) / (max_v-min_v)) for x in data])
+
+    #fix offset
+    offset = min_v+max_v
+    data = data+(offset/2)
+
+    #normalize array
+    data = np.array([((x-min_v) / (max_v-min_v)) for x in data])*2.0-1
+
+    #scale values and return array
+    return data * ((max_v/min_v)*-1)
+
+
 
 sr, data = wavfile.read("guitar.wav")
+data = norm(data)
+
+
 
 
 #######echo FX##############
@@ -24,30 +38,40 @@ def echo(signal, time, feedback,mix=1.0,cutoff =4000):
 
     #allocate memory
     product = np.zeros_like(signal, dtype='float64')
+    
 
     for i in range(feedback):
         #create empty array in length of delay time X feedback iteration
         shift = np.zeros(d)
         #concatenate <signal - tail(d)> to empty array
-        delay = np.concatenate([shift, signal[:-d]*mix-(1.0/feedback)])
+        delay = np.concatenate([shift, signal[:-d]*(1.0/(i+1))])
         #increase shift size for next iteration
         d += x
         #mix product with filtered & delayed signal
         product += sig.filtfilt(a,b,delay)
 
-    return product
+    return norm(product)*mix
+
+
 
 #create 'wet' signal
-e= norm(echo(data, 0.3, 3, 0.7, 3000))
+e= echo(data, 0.05 ,10 , 0.9, 3000)
+
+
+
 
 ##plot signals
 t = np.arange(0,1.0,1.0/len(data))
-plt.plot(t, norm(data))
+plt.plot(t, data)
 plt.plot(t, e)
 plt.show()
 
+
+
 ##mix dry & wet signals
-e = norm(e+norm(data))
+e = norm(e+data)
+
+
 
 ####WRITE AUDIO FILE####
 e *= 32767
