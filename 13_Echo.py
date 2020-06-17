@@ -20,20 +20,20 @@ def norm(data):
 
 
 
+
 sr, data = wavfile.read("guitar.wav")
 data = norm(data)
 
 
 
-
 #######echo FX##############
-def echo(signal, time, feedback,mix=1.0,cutoff =4000):
+def echo(signal, bpm, feedback,mix=1.0,cutoff =4000):
     #create filter
     w = cutoff/(44100/2)
     a,b = sig.butter(4, w, "low", analog=False)
 
     #calc time in samples
-    x = int(time*44100)
+    x = round(1/bpm * 60 * 44100)
     d = x
 
     #allocate memory
@@ -55,7 +55,7 @@ def echo(signal, time, feedback,mix=1.0,cutoff =4000):
 
 
 #create 'wet' signal
-e= echo(data, 0.05 ,10 , 0.9, 3000)
+e= echo(data, 300 ,10 , 0.5, 3000)
 
 
 
