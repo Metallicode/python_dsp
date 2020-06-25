@@ -22,16 +22,13 @@ def merge(a,b, overlap):
     return list(a[:-overlap]) + cross_fade(a[len(a)-overlap:], b[:overlap]) + list(b[overlap:] )
 
 def cross_fade(a,b):
-    newlst = []
-    lin = [x/10 for x in range(0,len(a))]
-    for i in range(len(a)):
-        newlst.append((a[i]*lin[::-1][i]) + (b[i]*lin[i]))
-    return newlst
-
+    lin = np.arange(0,1.0, 1/len(a))
+    return [((a[i]*lin[::-1][i]) + (b[i]*lin[i])) for i in range(len(a))]
 
 def filter_sweep(signal, hi_freq, order = 5, step=1000, upsweep=True):
     p = split_signal(signal, step, step*2)
-    env = np.array([k for k in np.linspace(10,hi_freq, len(p))])
+    
+    env = np.linspace(10,hi_freq, len(p))
     
     x = []
     
@@ -42,28 +39,29 @@ def filter_sweep(signal, hi_freq, order = 5, step=1000, upsweep=True):
         x.append(filtfilt(b, a,p[i]))
 
     x = heal(x, step)
-    return x
+    return np.array(x)
+
+
 
 
 ##create signal
 sample_rate = 44100
-frequency = 90
-note_length = 10
+frequency = 60
+note_length = 5
 t = np.arange(0,1.0*note_length,1.0/sample_rate,  dtype='float64')
 product = sgl.sawtooth(2 * np.pi * frequency * t)
 
-
 ##Filter the signal
-product = np.array(filter_sweep(product, 5000))
+product = filter_sweep(product, 5000, upsweep=False)
 
 ##Normalize......
-x = norm(product)[::-1]
+product = norm(product)[::-1]
 
 ##Plot
-plt.plot([i for i in range(len(x))],x)
+plt.plot(t,product)
 plt.show()
 
 ##Write to file
-x *= 32767
-x = np.int16(x)
-wavfile.write("file.wav", 44100, x)
+product *= 32767
+product = np.int16(product)
+wavfile.write("file.wav", 44100, product)
