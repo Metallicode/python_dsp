@@ -21,8 +21,7 @@ def sigmoid_a(length, position=1):
 
     return norm(y**position)
 
-
-
+#speed is length of linear function, direction[up, down, bi], length of signal
 def sigmoid_b(speed, direction, length):
     T = np.arange(-1.0,1.0,1.0/sample_rate)
     tq = np.arange(1,speed,1.0/sample_rate)
@@ -53,34 +52,76 @@ def sigmoid_b(speed, direction, length):
     return out
 
 
+#x is the value at z & zb intercept. b is z curve . a is zc curve.
+def sigmoid_c(length, x, b, a):
+    
+    t = np.arange(0,1.0*length,1/44100)   
+    z = np.zeros_like(t)
+    zb = np.zeros_like(t)
+    zc = np.zeros_like(t)
+
+    hashaka_index = 0
+    done = False
+    for i in range(len(t)):
+        z[i] = b*t[i]**2
+
+        if t[i] >= x and done is False:
+            hashaka_index = i
+            done=True
+  
+    nigzeret = b*2
+    shipoa = nigzeret*x
+
+    nekodat_hashaka = (x, b*x**2)
+
+    for i in range(len(t)):
+        zb[i] = shipoa*t[i] + (nekodat_hashaka[1] - (shipoa*nekodat_hashaka[0]))
+
+    last = -1000
+    for i in range(len(t)):
+        zc[i] =  (a*t[i]**2) + (shipoa*t[i]) + (nekodat_hashaka[1] - (shipoa*nekodat_hashaka[0]))
+        if zc[i] > last:
+            last = zc[i]
+        else:
+            zc[i]=last
+        
+##    plt.plot(t, z)
+##    plt.plot(t, zb)
+##    plt.plot(t, zc)
+##    plt.show()
+
+    delta = max(zb) + max(z[:hashaka_index])
+
+    f = norm(np.concatenate([z[:hashaka_index], zb[hashaka_index:], zc+delta]))
+
+    return f
+
+
+
 #shut up and drive...
 sample_rate = 44100
-frequency = 50
-length = 10
+frequency = 200
+length = 5
 
-q = sigmoid_a(length,1)
-##q = sigmoid_b(5, 'bi',length)
+##s = sigmoid_a(length,1)
+##s = sigmoid_b(2, 'bi',length)
+##s = sigmoid_c(length,3,4,-4)
 
-plt.plot(range(len(q)), q)
-plt.show()
 
-y = np.sin(2 * np.pi * 1000 * q)
-
-##s = sigmoid(0.5, 'up', length)
 
 
 ###Sin WAVE
-##y = np.sin(2 * np.pi * 1550 * s)
+y = np.sin(2 * np.pi * frequency * s)
 
-
-##y =  np.sin(2 * np.pi * frequency * y * s)
-
+ 
+#y =  np.sin(2 * np.pi * frequency * y)
 
 
 ####WRITE AUDIO FILE####
 y *= 32767
 y = np.int16(y)
-wavfile.write("fileenv.wav", 44100, y)
+wavfile.write("Sigmoid_Env.wav", 44100, y)
 
-##plt.plot(range(len(s)), s)
-##plt.show()
+plt.plot(range(len(s)), s)
+plt.show()
+
