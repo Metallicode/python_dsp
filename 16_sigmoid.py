@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from scipy import signal as sgl
 from scipy.signal import savgol_filter
-
+plt.style.use('dark_background')
 
 #normalize function 0-1
 def norm(data):
@@ -12,14 +12,12 @@ def norm(data):
     return np.array([((x-min_v) / (max_v-min_v)) for x in data])
 
 
-##length will set the s width (1,1 will return a linear t), position is the s location on the x axis
-def sigmoid_a(length, position=1):
+##a is the s location on the x axis, b is power of curve
+def sigmoid_a(length, a=1, b=1):
     t = np.arange(-1.0*(length/2),1.0*(length/2),1.0/sample_rate) 
-    y = np.zeros_like(t)
-    for i in range(len(t)):
-        y[i] = 1/ (1 + np.e**-t[i])
+    sig = 1 / (a + np.exp(-t*b))
+    return sig
 
-    return norm(y**position)
 
 #speed is length of linear function, direction[up, down, bi], length of signal
 def sigmoid_b(speed, direction, length):
@@ -54,32 +52,35 @@ def sigmoid_b(speed, direction, length):
 
 #x is the value at z & zb intercept. b is z curve . a is zc curve.
 def sigmoid_c(length, x, b, a):
-    
+
+    #create X vector and allocate axis.
     t = np.arange(0,1.0*length,1/44100)   
     z = np.zeros_like(t)
     zb = np.zeros_like(t)
     zc = np.zeros_like(t)
 
-    hashaka_index = 0
+    #Create first exponential function 
+    Tangent_index = 0
     done = False
     for i in range(len(t)):
         z[i] = b*t[i]**2
 
         if t[i] >= x and done is False:
-            hashaka_index = i
+            Tangent_index = i
             done=True
-  
-    nigzeret = b*2
-    shipoa = nigzeret*x
 
-    nekodat_hashaka = (x, b*x**2)
+    #calculate function derivative ( the sensitivity to change of the function value (output value) with respect to a change in its argument (input value))
+    derivative = b*2
+    gradient = derivative*x
+    tangent = (x, b*x**2)
 
     for i in range(len(t)):
-        zb[i] = shipoa*t[i] + (nekodat_hashaka[1] - (shipoa*nekodat_hashaka[0]))
+        zb[i] = gradient*t[i] + (tangent[1] - (gradient*tangent[0]))
 
-    last = -1000
+    last = -1000000
+    
     for i in range(len(t)):
-        zc[i] =  (a*t[i]**2) + (shipoa*t[i]) + (nekodat_hashaka[1] - (shipoa*nekodat_hashaka[0]))
+        zc[i] =  (a*t[i]**2) + (gradient*t[i]) + (tangent[1] - (gradient*tangent[0]))
         if zc[i] > last:
             last = zc[i]
         else:
@@ -90,38 +91,35 @@ def sigmoid_c(length, x, b, a):
 ##    plt.plot(t, zc)
 ##    plt.show()
 
-    delta = max(zb) + max(z[:hashaka_index])
-
-    f = norm(np.concatenate([z[:hashaka_index], zb[hashaka_index:], zc+delta]))
-
+    delta = max(zb) + max(z[:Tangent_index])
+    f = norm(np.concatenate([z[:Tangent_index], zb[Tangent_index:], zc+delta]))
     return f
 
 
 
-#shut up and drive...
+########## Be Quiet And Drive... #####################
+
 sample_rate = 44100
 frequency = 200
 length = 5
 
-##s = sigmoid_a(length,1)
-##s = sigmoid_b(2, 'bi',length)
-##s = sigmoid_c(length,3,4,-4)
-
-
+##s = sigmoid_a(10, 1, 2)
+##s = sigmoid_b(10, 'bi',length)
+s = sigmoid_c(length,3,2,-10)
 
 
 ###Sin WAVE
-y = np.sin(2 * np.pi * frequency * s)
-
- 
-#y =  np.sin(2 * np.pi * frequency * y)
+##y = np.sin(2 * np.pi * frequency * s)
+##
+##y =  np.sin(2 * np.pi * frequency * y)
 
 
 ####WRITE AUDIO FILE####
-y *= 32767
-y = np.int16(y)
-wavfile.write("Sigmoid_Env.wav", 44100, y)
+##y *= 32767
+##y = np.int16(y)
+##wavfile.write("Sigmoid_Env.wav", 44100, y)
 
 plt.plot(range(len(s)), s)
+plt.grid()
 plt.show()
 
