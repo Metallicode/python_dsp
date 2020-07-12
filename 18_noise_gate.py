@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -26,8 +27,28 @@ def segments(keyframes, First=True):
     else:
         return [(keyframes[i],keyframes[i+1]) for i in range(1,len(keyframes)-1, 2)]
 
+
+def calculate_dynamics(rms, threshold):
+    keyframes = []
+    lastkeyframewasUp = False
+
+    for i in range(len(rms)):  
+        if  rms[i] <  threshold:
+            if lastkeyframewasUp == True:
+                keyframes.append(i)
+                lastkeyframewasUp = False
+        else:
+             if lastkeyframewasUp == False:
+                keyframes.append(i)
+                lastkeyframewasUp = True
+
+    keyframes.append(len(signal))
+    return keyframes
+    
+
+
 #read file
-samplerate, signal = wavfile.read("count.wav")
+samplerate, signal = wavfile.read("beat.wav")
 signal = norm(np.array(signal,dtype=np.float64))
 
 ########-RMS-#########
@@ -44,25 +65,9 @@ normal_cutoff = cutoff / (44100/2)
 b, a = butter(2, normal_cutoff, btype="low", analog=False) 
 rms = filtfilt(b, a,rms)
 
-#keyframes 
-threshold = 0.02
-keyframes = []
-lastkeyframewasUp = False
-
-for i in range(len(rms)):  
-    if  rms[i] <  threshold:
-        if lastkeyframewasUp == True:
-            keyframes.append(i)
-            lastkeyframewasUp = False
-    else:
-         if lastkeyframewasUp == False:
-            keyframes.append(i)
-            lastkeyframewasUp = True
-
-keyframes.append(len(signal))
-
-
-
+#gate
+threshold = 0.2
+keyframes = calculate_dynamics(rms, threshold)
 gated = signal*gates(signal, segments(keyframes, False))
 
 #draw
