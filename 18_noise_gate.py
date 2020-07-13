@@ -28,7 +28,7 @@ def segments(keyframes, First=True):
         return [(keyframes[i],keyframes[i+1]) for i in range(1,len(keyframes)-1, 2)]
 
 def calculate_dynamics(rms, threshold):
-    keyframes = []
+    keyframes = [0]
     lastkeyframewasUp = False
 
     for i in range(len(rms)):  
@@ -42,15 +42,16 @@ def calculate_dynamics(rms, threshold):
                 lastkeyframewasUp = True
 
     keyframes.append(len(signal))
+
+    if keyframes[1] == 0:
+        del keyframes[0]
     return keyframes
     
 
 
 
-
-
 #read file
-samplerate, signal = wavfile.read("beat.wav")
+samplerate, signal = wavfile.read("count.wav")
 signal = norm(np.array(signal,dtype=np.float64))
 
 ########-RMS-#########
@@ -60,7 +61,7 @@ buffer_size = 1000
 for i in range(0,len(signal),buffer_size):
     s = signal[i:i+buffer_size]
     rms[i:i+buffer_size] = np.sqrt(np.mean(s**2))
-    
+ 
 #smooth...
 cutoff = 20
 normal_cutoff = cutoff / (44100/2)
@@ -70,19 +71,25 @@ rms = filtfilt(b, a,rms)
 #gate
 threshold = 0.2
 keyframes = calculate_dynamics(rms, threshold)
-g = gates(signal, segments(keyframes, False), 50)
+g = gates(signal, segments(keyframes, True), 50)
 gated = signal*g
 
-#draw
+
+
+
+######## Draw ##########
 plt.plot(range(len(signal)), signal, "black")
 plt.plot(range(len(signal)), gated, "pink")
 
 plt.plot(range(len(signal)), g, "yellow")
-plt.plot(range(len(rms)), rms, "red")
+plt.plot(range(len(signal)), rms, "red")
+
 plt.axhline(y=threshold, color ="green")
 
 plt.show()
 
+
+#write to file
 gated *= 32767
 gated = np.int16(gated)
 wavfile.write("file.wav", 44100, gated)
