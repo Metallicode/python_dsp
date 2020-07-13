@@ -18,10 +18,7 @@ def norm(data, simple=False):
 def gates(signal, segments, speed= 50):
     ones = np.ones_like(signal)
     for s in segments:
-        t = np.linspace(-speed,speed,s[1]-s[0])
-        hyper_s = np.sinh(t)
-        window = (hyper_s*hyper_s)
-        ones[s[0]:s[1]] = norm(window, True)
+        ones[s[0]:s[1]] = norm(np.cosh(np.linspace(-speed,speed,s[1]-s[0])), True)
     return ones
 
 def segments(keyframes, First=True):
