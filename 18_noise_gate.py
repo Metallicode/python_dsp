@@ -1,4 +1,5 @@
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -19,9 +20,9 @@ def norm(data, simple=False):
 def flat_edge(arr,keyframes, intro=True):
     if intro:
         a = keyframes[0]
-        b = keyframes[1]
+        b = int(keyframes[1]//2)
     else:
-        a = keyframes[-2]
+        a = int(keyframes[-2]+((len(arr) - keyframes[-2]) // 2))
         b = keyframes[-1]        
     
     for i in range(a,b):
@@ -81,7 +82,7 @@ b, a = butter(2, normal_cutoff, btype="low", analog=False)
 rms = filtfilt(b, a,rms)
 
 # calculate gate
-threshold = 0.2
+threshold = 0.18
 flip_order = True
 
 keyframes = calculate_dynamics(rms, threshold)
@@ -94,6 +95,10 @@ g = flat_edge(g, keyframes, False)
 
 ## gate signal
 gated = signal*g
+
+
+
+
 
 ######## Draw ##########
 plt.plot(range(len(signal)), signal, "black")
