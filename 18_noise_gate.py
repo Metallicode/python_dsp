@@ -1,3 +1,4 @@
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -14,6 +15,18 @@ def norm(data, simple=False):
         return data * ((max_v/min_v)*-1)
     else:
         return np.array([((x-min_v) / (max_v-min_v)) for x in data]) 
+
+def flat_edge(arr,keyframes, intro=True):
+    if intro:
+        a = keyframes[0]
+        b = keyframes[1]
+    else:
+        a = keyframes[-2]
+        b = keyframes[-1]        
+    
+    for i in range(a,b):
+        arr[i] = 0
+    return arr
 
 def gates(signal, segments, speed= 50):
     ones = np.ones_like(signal)
@@ -49,7 +62,6 @@ def calculate_dynamics(rms, threshold):
     
 
 
-
 #read file
 samplerate, signal = wavfile.read("count.wav")
 signal = norm(np.array(signal,dtype=np.float64))
@@ -68,14 +80,20 @@ normal_cutoff = cutoff / (44100/2)
 b, a = butter(2, normal_cutoff, btype="low", analog=False) 
 rms = filtfilt(b, a,rms)
 
-#gate
+# calculate gate
 threshold = 0.2
+flip_order = True
+
 keyframes = calculate_dynamics(rms, threshold)
-g = gates(signal, segments(keyframes, True), 50)
+g = gates(signal, segments(keyframes, flip_order), 50)
+
+### flate edges #####
+g = flat_edge(g, keyframes, True)
+g = flat_edge(g, keyframes, False)
+
+
+## gate signal
 gated = signal*g
-
-
-
 
 ######## Draw ##########
 plt.plot(range(len(signal)), signal, "black")
