@@ -1,5 +1,3 @@
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -29,19 +27,16 @@ def flat_edge(arr,keyframes, intro=True):
         arr[i] = 0
     return arr
 
-def gates(signal, segments, speed= 50):
+def gates(signal, segments, speed=50):
     ones = np.ones_like(signal)
     for s in segments:
-        ones[s[0]:s[1]] = norm(np.cosh(np.linspace(-speed,speed,s[1]-s[0])), True)
+        ones[s[0]:s[1]] = norm(np.cosh(np.linspace(-speed,speed,s[1]-s[0])), True)       
     return ones
 
 def segments(keyframes, First=True):
-    if First == True:
-        return [(keyframes[i],keyframes[i+1]) for i in range(0,len(keyframes)-1,2)]
-    else:
-        return [(keyframes[i],keyframes[i+1]) for i in range(1,len(keyframes)-1, 2)]
+    return [(keyframes[i],keyframes[i+1]) for i in range(int(not First),len(keyframes)-1,2)]
 
-def calculate_dynamics(rms, threshold):
+def threshold_keyframes(rms, threshold):
     keyframes = [0]
     lastkeyframewasUp = False
 
@@ -63,6 +58,9 @@ def calculate_dynamics(rms, threshold):
     
 
 
+
+
+
 #read file
 samplerate, signal = wavfile.read("count.wav")
 signal = norm(np.array(signal,dtype=np.float64))
@@ -81,11 +79,17 @@ normal_cutoff = cutoff / (44100/2)
 b, a = butter(2, normal_cutoff, btype="low", analog=False) 
 rms = filtfilt(b, a,rms)
 
+
+
+
+
+
+
 # calculate gate
 threshold = 0.18
 flip_order = True
 
-keyframes = calculate_dynamics(rms, threshold)
+keyframes = threshold_keyframes(rms, threshold)
 g = gates(signal, segments(keyframes, flip_order), 50)
 
 ### flate edges #####
@@ -95,6 +99,9 @@ g = flat_edge(g, keyframes, False)
 
 ## gate signal
 gated = signal*g
+
+
+
 
 
 
@@ -110,6 +117,8 @@ plt.plot(range(len(signal)), rms, "red")
 plt.axhline(y=threshold, color ="green")
 
 plt.show()
+
+
 
 
 #write to file
