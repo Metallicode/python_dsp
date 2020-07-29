@@ -62,7 +62,7 @@ def threshold_keyframes(rms, threshold):
 
 
 #read file
-samplerate, signal = wavfile.read("count.wav")
+samplerate, signal = wavfile.read("beat.wav")
 signal = norm(np.array(signal,dtype=np.float64))
 
 ########-RMS-#########
@@ -87,18 +87,19 @@ rms = filtfilt(b, a,rms)
 
 # calculate gate
 threshold = 0.18
-flip_order = True
+flip_order = False
 
 keyframes = threshold_keyframes(rms, threshold)
 g = gates(signal, segments(keyframes, flip_order), 50)
 
 ### flate edges #####
-g = flat_edge(g, keyframes, True)
-g = flat_edge(g, keyframes, False)
+##g = flat_edge(g, keyframes, True)
+##g = flat_edge(g, keyframes, False)
 
 
 ## gate signal
 gated = signal*g
+
 
 
 
