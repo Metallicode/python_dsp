@@ -19,11 +19,13 @@ def render(beat, smpl):
 		elif (i == "0"):
 			signal+=list(silence)
 		else:
-			pass
+			signal+=list(np.array(smpl,dtype=np.float64))[::-1]
 			
 	return np.array(signal)
 	
 	
+
+
 
 SAMPLE_RATE = 44100
 BPM = 200
@@ -36,14 +38,16 @@ _, sample_b = wavfile.read("sound02.wav")
 sample_a = sample_a[:int(SAMPLE_RATE*(STEP_TIME/1000))]
 sample_b = sample_b[:int(SAMPLE_RATE*(STEP_TIME/1000))]
 
-beat_a = "100"
-beat_b = "10000"
+beat_a = input("enter first pattern: ")
+beat_b = input("enter 2nd pattern: ")
 
 beat_a *= len(beat_b)
 beat_b *= len(beat_a)//len(beat_b)
 
 new = norm(render(beat_a, sample_a)+render(beat_b, sample_b))
 
+
+new = np.array(list(new)*20)
 
 ####WRITE AUDIO FILE####
 now = datetime.now()
