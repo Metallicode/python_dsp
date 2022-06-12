@@ -1,0 +1,18 @@
+hello everyone, this is the second video I am making on this topic, ill put a link for the first 
+one in the comments. 
+so this time we will continue our journey of learning to use python for creative audio processing.
+the topics I will be covering today are:
+- Complex Waveforms (Basically mixing 2 or more signals)
+- Binaural beats (we will write a powerful short script capable of generating binaural beats style  audio files, based on our choice of fundamental freq + desired brain wave pattern.
+- We will see that mixing signals can result in combined amplitude output levels, which if left unattended will result in digital distortion. I will show you how to work around this problem by 
+setting different amplitudes to each component signal, allowing their amplitude sum to stay within a range of -1 and 1 values.
+- we will see also how to normalize our signals for an easier approach to this problem.
+- after this, we will see a simple cluster generator - this is a very nice concept of potting hundreds or more detuned signals and playing with the result.
+- this will be a good place to mention FastFouriTransform and implement a simple FFT analyzer.
+- next, I will go on with a general idea of tone perception, and how harmonically aligned components result in a perceived "oneness" and each component is perceived as a "overtone" of a fondemental freq, vs the perception of a fragmented set of intervals, when generating a non-harminic set of components. 
+- after this we will write a script capable of generating "string-like" tones, using a simple harmonic series of frequencies, and setting their amplitude with a couple of slop functions. this will give us a very powerful synthesizer, which we will refactor again to create a Wavetable synthesizer.
+- and last will be a nice concept I'm working on; the abstract is to analyze an audio sample with FFT, get a list of components, and regenerate them using our wavetable synthesizer. this will be an experimental tool that I'm sure you will love to try out and use.
+so before we start I want to encourage you to pull this git repo from my Github so you will have all the code I will be writing.
+and for everyone who enjoys this topic and my videos, please consider giving this video a like & subscribing to my channel.
+
+
