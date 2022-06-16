@@ -16,7 +16,7 @@ def norm(data):
 #arg 2 is fondamental 
 #arg 3 is n_overtons 
 
-frq = 440
+frq = 100
 sr = 44100
 length = 5.0
 n_overtons = 5

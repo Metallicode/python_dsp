@@ -104,7 +104,8 @@ hp_cutoff_freq=None,min_peak_heigth=None):
 
 if __name__ == "__main__":
 	p = PhysicalSynth()
-	p.Synthesize(fn=f"woodz/{input('filename')}.wav")
+	x = input('filename\n')
+	p.Synthesize(fn=f"woodz/{x}.wav")
 
 
 

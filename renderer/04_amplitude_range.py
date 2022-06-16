@@ -6,7 +6,7 @@ from scipy.io import wavfile
 #arg 1 is length
 #arg 2 is comma seperated freqs
 
-frq = 440
+frq = [440]
 sr = 44100
 length = 5.0
 

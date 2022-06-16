@@ -40,7 +40,8 @@ class Wavtable:
 		slop_weights = self._slop_maker(len(self.s), s_type=self.slop_type)
 		for i in range(len(self.frqs)):
 			self.s += np.sin(2*np.pi* self.frqs[i] * self.t)*slop_weights[i]
-		return self._norm(self.s)
+		self.s =  self._norm(self.s)
+		return self.s
 	
 	def Render(self, name):
 		self.s *= 32767

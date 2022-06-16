@@ -11,13 +11,23 @@ sr = 44100
 length = 5.0
 
 if(len(sys.argv)>1):
-	length = int(sys.argv[1])
+	length = float(sys.argv[1])
 	
 if(len(sys.argv)>2):
 	frq = float(sys.argv[2])
 
+
+
+
+
+
 t = np.arange(0, length, 1.0/sr)
 s = np.sin(2*np.pi* frq *t)
+
+
+plt.plot(t, s)
+plt.show()
+
 
 s *= 32767
 s = np.int16(s)
